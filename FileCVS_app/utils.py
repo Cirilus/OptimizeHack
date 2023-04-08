@@ -3,8 +3,10 @@ import os
 import shutil
 from unidecode import unidecode
 import chardet as chardet
+from fastapi import HTTPException
 from docx import Document
 from git import Repo
+
 
 
 class Git:
@@ -15,21 +17,35 @@ class Git:
         else:
             self.repo = Repo(self.repo_path)
 
-    def new_version(self, file_name, file, name_commit):
+    def new_commit(self, file_name, commit_name, file,):
         doc_path = os.path.join(self.repo_path, file_name)
-        document = Document(file)
+        if not(os.path.exists(doc_path)):
+            raise HTTPException(status_code=404, detail="Current fail doesn't exist")
+        document = Document(io.BytesIO(file))
         document.save(doc_path)
         index = self.repo.index
         index.add([doc_path])
-        index.commit(name_commit)
+        index.commit(commit_name)
 
-    def get_all_commits(self, file_name):
+        return "ok"
+
+    def get_commits(self, file_name):
         commits = []
         for commit in self.repo.iter_commits(paths=file_name):
             commits.append(commit.message)
+
+        return commits
+
+    def get_files(self):
+        return os.listdir("word_docs")
 
     def get_commit(self, commit_name, file_name):
         for commit in self.repo.iter_commits(paths=file_name):
             if commit.message == commit_name:
                 contents = commit.tree[file_name].data_stream.read()
-                return io.BytesIO(contents)
+                document = Document(io.BytesIO(contents))
+                paragraphs = []
+                for paragraph in document.paragraphs:
+                    paragraphs.append(paragraph.text)
+
+                return paragraphs
