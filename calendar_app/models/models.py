@@ -8,10 +8,11 @@ class Date(BaseModel):
 
 
 class Event(BaseModel):
-    summary: str
-    location: str
-    description: str
-    start: Date
-    end: Date
+    summary: str | None
+    location: str | None
+    description: str | None
+    start: Date | None
+    end: Date | None
+
 
 

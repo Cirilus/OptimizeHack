@@ -50,3 +50,11 @@ class Calendar:
 
         return self.service.events().insert(calendarId=self.calendar_id, body=event).execute()
 
+    def delete_event(self, eventId):
+        return self.service.events().delete(calendarId=self.calendar_id, eventId=eventId).execute()
+
+    def patch_event(self, eventId, body):
+        return self.service.events().patch(calendarId=self.calendar_id, eventId=eventId, body=body).execute()
+
+
+

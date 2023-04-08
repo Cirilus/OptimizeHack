@@ -1,13 +1,12 @@
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from starlette.requests import Request
-from starlette.responses import HTMLResponse
-from starlette.templating import Jinja2Templates
+import json
+
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from utils import Calendar
 from models.models import Event
 import os
 from dotenv import load_dotenv
+from googleapiclient.errors import HttpError
 
 
 app = FastAPI(docs_url="/", redoc_url=None)
@@ -41,5 +40,25 @@ def get_events():
 
 @app.post("/events")
 def create_events(event: Event):
+    print(Event)
     return calendar.add_event(event)
 
+
+@app.delete("/events/{eventId}")
+def create_events(eventId: str):
+    try:
+        response = calendar.delete_event(eventId)
+    except HttpError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    return response
+
+
+@app.patch("/events/{eventId}")
+def create_events(body: Event, eventId: str):
+    body = json.loads(body.json(exclude_unset=True))
+    try:
+        response = calendar.patch_event(eventId, body)
+    except HttpError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    print(response)
+    return response
