@@ -1,0 +1,32 @@
+version: "3.9"
+
+
+services:
+  calendar:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./calendar_app
+    container_name:
+      calendar
+    env_file:
+      - ./calendar_app/.env
+  cvs:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./FileCVS_app
+    container_name:
+      cvs
+    env_file:
+      - ./FileCVS_app/.env
+  nginx:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./docker/nginx/
+    container_name: nginx
+    env_file:
+      - .env
+    depends_on:
+      - cvs
+      - calendar
+    ports:
+      - "${NGINX_EXTERNAL_PORT}:80"
